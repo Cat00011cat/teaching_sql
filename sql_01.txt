@@ -1,0 +1,63 @@
+-- Cat00011cat
+
+-- 专业表
+CREATE TABLE speciality(
+	specialityno CHAR(6) NOT NULL PRIMARY KEY COMMENT '专业代码',
+	specialityname CHAR(16) NULL COMMENT '专业名称'
+);
+
+-- 学生表
+CREATE TABLE student(
+	studentno CHAR(6) NOT NULL PRIMARY KEY COMMENT '学号',
+	sname CHAR(8) NOT NULL COMMENT '姓名',
+	ssex  CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	sbirthday DATE NOT NULL COMMENT '出生日期',
+	tc TINYINT NULL COMMENT '总学分',
+	specialityno CHAR(6) NOT NULL COMMENT '专业代码'
+);
+
+-- 课程表
+CREATE TABLE course(
+	courseno CHAR(4) NOT NULL PRIMARY KEY COMMENT '课程号',
+	cname CHAR(16) NOT NULL COMMENT '课程名',
+	credit TINYINT NULL COMMENT '学分'
+);
+
+-- 教师表
+CREATE TABLE teacher(
+	teacher CHAR(6) NOT NULL PRIMARY KEY COMMENT '教师编号',
+	tname CHAR(8) NOT NULL COMMENT '姓名',
+	tsex CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	tbirthday DATE NOT NULL COMMENT '出生日期',
+	title CHAR(12) NULL COMMENT '职称',
+	school CHAR(12) NULL COMMENT '学院'
+);
+
+-- 成绩表
+CREATE TABLE score(
+-- 建立外键约束   说明不能村内放到 外键约束之后。
+	studentno CHAR(6) NOT NULL COMMENT '学号' REFERENCES student(studentno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	grade TINYINT NULL COMMENT '成绩',
+-- 	对成绩添加自定义约束
+	CHECK (grade >= 0 AND grade <= 100),
+-- 	联合主键
+	PRIMARY KEY(studentno, courseno)
+);
+
+-- 讲课表
+CREATE TABLE lecture(
+	teacherno CHAR(6) NOT NULL COMMENT '教师编号' REFERENCES teacher(teacherno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	location CHAR(10) NULL COMMENT '上课地点',
+	PRIMARY KEY(teacherno, courseno)
+);
+
+
+
+
+
+
+
+
+
