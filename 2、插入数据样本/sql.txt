@@ -1,0 +1,125 @@
+-- Cat00011cat
+
+-- 专业表
+CREATE TABLE speciality(
+	specialityno CHAR(6) NOT NULL PRIMARY KEY COMMENT '专业代码',
+	specialityname CHAR(16) NULL COMMENT '专业名称'
+);
+
+-- 学生表
+CREATE TABLE student(
+	studentno CHAR(6) NOT NULL PRIMARY KEY COMMENT '学号',
+	sname CHAR(8) NOT NULL COMMENT '姓名',
+	ssex  CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	sbirthday DATE NOT NULL COMMENT '出生日期',
+	tc TINYINT NULL COMMENT '总学分',
+	specialityno CHAR(6) NOT NULL COMMENT '专业代码'
+);
+
+-- 课程表
+CREATE TABLE course(
+	courseno CHAR(4) NOT NULL PRIMARY KEY COMMENT '课程号',
+	cname CHAR(16) NOT NULL COMMENT '课程名',
+	credit TINYINT NULL COMMENT '学分'
+);
+
+-- 教师表
+CREATE TABLE teacher(
+	teacher CHAR(6) NOT NULL PRIMARY KEY COMMENT '教师编号',
+	tname CHAR(8) NOT NULL COMMENT '姓名',
+	tsex CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	tbirthday DATE NOT NULL COMMENT '出生日期',
+	title CHAR(12) NULL COMMENT '职称',
+	school CHAR(12) NULL COMMENT '学院'
+);
+
+-- 成绩表
+CREATE TABLE score(
+-- 建立外键约束   说明不能村内放到 外键约束之后。
+	studentno CHAR(6) NOT NULL COMMENT '学号' REFERENCES student(studentno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	grade TINYINT NULL COMMENT '成绩',
+-- 	对成绩添加自定义约束
+	CHECK (grade >= 0 AND grade <= 100),
+-- 	联合主键
+	PRIMARY KEY(studentno, courseno)
+);
+
+-- 讲课表
+CREATE TABLE lecture(
+	teacherno CHAR(6) NOT NULL COMMENT '教师编号' REFERENCES teacher(teacherno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	location CHAR(10) NULL COMMENT '上课地点',
+	PRIMARY KEY(teacherno, courseno)
+);
+
+
+
+
+-- 插入数据样本
+-- INSERT INTO 被插入表 VALUES(值,值,值...);
+INSERT INTO speciality VALUES('080701','电子信息工程');
+INSERT INTO speciality VALUES('080702','电子科学与技术');
+INSERT INTO speciality VALUES('080703','通信工程');
+INSERT INTO speciality VALUES('080901','计算机科学与技术');
+INSERT INTO speciality VALUES('080902','软件工程');
+INSERT INTO speciality VALUES('080903','网络工程');
+
+INSERT INTO student VALUES('193001','梁俊松','男','1992-12-05','52','080903');
+INSERT INTO student VALUES('193002','周玲','女','1998-04-17','50','080903');
+INSERT INTO student VALUES('193003','夏玉坊','女','1999-06-25','52','080903');
+INSERT INTO student VALUES('198001','康文卓','男','1998-10-14','50','080703');
+INSERT INTO student VALUES('198002','张小翠','女','1998-09-21','48','080703');
+INSERT INTO student VALUES('198004','洪啵','男','1999-11-08','52','080703');
+
+INSERT INTO course VALUES('1004','数据库系统',4);
+INSERT INTO course VALUES('1009','软件工程',3);
+INSERT INTO course VALUES('1201','英语',4);
+INSERT INTO course VALUES('4008','通信原理',4);
+INSERT INTO course VALUES('8001','高等数学',4);
+
+INSERT INTO score VALUES('193001','1004',93);
+INSERT INTO score VALUES('193002','1004',86);
+INSERT INTO score VALUES('193003','1004',94);
+INSERT INTO score VALUES('193001','1201',93);
+INSERT INTO score VALUES('193002','1201',85);
+INSERT INTO score VALUES('193003','1201',93);
+INSERT INTO score VALUES('198001','1201',91);
+INSERT INTO score VALUES('198002','1201',NULL);
+INSERT INTO score VALUES('198004','1201',92);
+INSERT INTO score VALUES('198001','4008',92);
+INSERT INTO score VALUES('198002','4008',79);
+INSERT INTO score VALUES('198004','4008',87);
+INSERT INTO score VALUES('193001','8001',91);
+INSERT INTO score VALUES('193002','8001',89);
+INSERT INTO score VALUES('193003','8001',87);
+INSERT INTO score VALUES('198001','8001',91);
+INSERT INTO score VALUES('198002','8001',77);
+INSERT INTO score VALUES('198004','8001',95);
+
+INSERT INTO teacher VALUES('100004','郭逸超','男','1975-07-24','教授','计算机学院');
+INSERT INTO teacher VALUES('100021','任敏','女','1979-10-05','教授','计算机学院');
+INSERT INTO teacher VALUES('800023','杨静','女','1983-03-12','副教授','外国语学院');
+INSERT INTO teacher VALUES('120037','周章群','女','1988-09-21','僵尸','通信学院');
+INSERT INTO teacher VALUES('400012','黄玉杰','男','1985-12-18','副教授','数学学院');
+
+INSERT INTO lecture  VALUES('100004','1004','5-314');
+INSERT INTO lecture  VALUES('120037','1201','4-317');
+INSERT INTO lecture  VALUES('400012','4008','1-208');
+INSERT INTO lecture  VALUES('800023','8001','6-105');
+
+-- 增删改查操作
+-- 查看数据库
+SHOW DATABASES;
+-- 选择数据库
+USE teaching;
+-- 列出所有表
+SHOW TABLES;
+-- 查看表
+SELECT * FROM course;
+SELECT * FROM lecture;
+SELECT * FROM score;
+SELECT COUNT(*) AS 总数 FROM score;
+SELECT * FROM speciality;
+SELECT * FROM student;
+SELECT * FROM teacher;
