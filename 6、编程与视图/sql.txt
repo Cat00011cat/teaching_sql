@@ -1,0 +1,616 @@
+-- Cat00011cat
+-- thecat.top
+
+--  ===================		er实体关系  ===========================
+-- 一对一 一对多 多对多
+
+
+-- 设置字符集
+
+-- 专业表
+CREATE TABLE speciality(
+	specialityno CHAR(6) NOT NULL PRIMARY KEY COMMENT '专业代码',
+	specialityname CHAR(16) NULL COMMENT '专业名称'
+);
+
+
+-- 学生表
+CREATE TABLE student(
+	studentno CHAR(6) NOT NULL PRIMARY KEY COMMENT '学号',
+	sname CHAR(8) NOT NULL COMMENT '姓名',
+	ssex  CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	sbirthday DATE NOT NULL COMMENT '出生日期',
+	tc TINYINT NULL COMMENT '总学分',
+	specialityno CHAR(6) NOT NULL COMMENT '专业代码'
+);
+
+
+-- 课程表
+CREATE TABLE course(
+	courseno CHAR(4) NOT NULL PRIMARY KEY COMMENT '课程号',
+	cname CHAR(16) NOT NULL COMMENT '课程名',
+	credit TINYINT NULL COMMENT '学分'
+);
+
+
+-- 教师表
+CREATE TABLE teacher(
+	teacher CHAR(6) NOT NULL PRIMARY KEY COMMENT '教师编号',
+	tname CHAR(8) NOT NULL COMMENT '姓名',
+	tsex CHAR(2) NOT NULL DEFAULT '男' COMMENT '性别',
+	tbirthday DATE NOT NULL COMMENT '出生日期',
+	title CHAR(12) NULL COMMENT '职称',
+	school CHAR(12) NULL COMMENT '学院'
+);
+
+
+-- 成绩表
+CREATE TABLE score(
+-- 建立外键约束   说明不能村内放到 外键约束之后。
+	studentno CHAR(6) NOT NULL COMMENT '学号' REFERENCES student(studentno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	grade TINYINT NULL COMMENT '成绩',
+-- 	对成绩添加自定义约束
+	CHECK (grade >= 0 AND grade <= 100),
+-- 	联合主键
+	PRIMARY KEY(studentno, courseno)
+);
+
+
+-- 讲课表
+CREATE TABLE lecture(
+	teacherno CHAR(6) NOT NULL COMMENT '教师编号' REFERENCES teacher(teacherno),
+	courseno CHAR(4) NOT NULL COMMENT '课程号' REFERENCES course(courseno),
+	location CHAR(10) NULL COMMENT '上课地点',
+	PRIMARY KEY(teacherno, courseno)
+);
+
+
+-- 插入数据样本
+-- INSERT INTO 被插入表 VALUES(值,值,值...);
+INSERT INTO speciality VALUES('080701','电子信息工程'),
+('080702','电子科学与技术'),
+('080703','通信工程'),
+('080901','计算机科学与技术'),
+('080902','软件工程'),
+('080903','网络工程');
+
+
+INSERT INTO student VALUES('193001','梁俊松','男','1992-12-05','52','080903'),
+('193002','周玲','女','1998-04-17','50','080903'),
+('193003','夏玉坊','女','1999-06-25','52','080903'),
+('198001','康文卓','男','1998-10-14','50','080703'),
+('198002','张小翠','女','1998-09-21','48','080703'),
+('198004','洪啵','男','1999-11-08','52','080703');
+
+
+INSERT INTO course VALUES('1004','数据库系统',4),
+('1009','软件工程',3),
+('1201','英语',4),
+('4008','通信原理',4),
+('8001','高等数学',4);
+
+
+INSERT INTO score VALUES('193001','1004',93),
+('193002','1004',86),
+('193003','1004',94),
+('193001','1201',93),
+('193002','1201',85),
+('193003','1201',93),
+('198001','1201',91),
+('198002','1201',NULL),
+('198004','1201',92),
+('198001','4008',92),
+('198002','4008',79),
+('198004','4008',87),
+('193001','8001',91),
+('193002','8001',89),
+('193003','8001',87),
+('198001','8001',91),
+('198002','8001',77),
+('198004','8001',95);
+
+
+INSERT INTO teacher VALUES('100004','郭逸超','男','1975-07-24','教授','计算机学院'),
+('100021','任敏','女','1979-10-05','教授','计算机学院'),
+('800023','杨静','女','1983-03-12','副教授','外国语学院'),
+('120037','周章群','女','1988-09-21','僵尸','通信学院'),
+('400012','黄玉杰','男','1985-12-18','副教授','数学学院');
+
+
+INSERT INTO lecture  VALUES('100004','1004','5-314'),
+('120037','1201','4-317'),
+('400012','4008','1-208'),
+('800023','8001','6-105');
+
+-- 增删改查操作
+-- 查看数据库
+SHOW DATABASES;
+
+
+-- 选择数据库
+USE teaching;
+
+
+-- 列出所有表
+SHOW TABLES;
+
+
+-- 查看表
+SELECT * FROM course;
+SELECT * FROM lecture;
+SELECT * FROM score;
+SELECT COUNT(*) AS 总数 FROM score;
+SELECT * FROM speciality;
+SELECT * FROM student;
+SELECT * FROM teacher;
+
+
+-- 插入数据
+
+-- =====================================	数据查询	============================================
+-- =====================================单表查询基础练习
+-- 查询所有男同学的基本信息
+SELECT * FROM student
+WHERE ssex="男";
+
+
+-- 查出所有总学分大于50的同学的学号，姓名，总学分。
+SELECT studentno,sname,tc FROM student 
+WHERE tc>50;
+
+
+-- 查出199年出生的女同学的基本信息
+SELECT * FROM student
+WHERE sbirthday LIKE "199%" AND ssex="女";
+
+
+-- 查出学号为193001的同学的所有成绩
+SELECT * FROM score
+WHERE studentno="193001";
+
+
+-- 查出课程号为1004或4008的所有成绩信息。  IN 用于指定范围 相当于或or
+SELECT * FROM score
+WHERE courseno IN(1004,4008);
+
+
+-- 查出所有大于90分的学号，课程号及成绩。
+SELECT studentno,courseno,grade FROM score
+WHERE grade>90;
+
+
+-- 查出所有80分段的成绩信息.	BETWEEN 关键字 介于 xxx区间（指定范围）。
+SELECT * FROM score
+WHERE grade BETWEEN 80 AND 89;
+
+
+-- 查出所有男教授的基本信息
+SELECT * FROM teacher
+WHERE tsex="男" AND title="教授"; 
+
+
+-- 查出所有计算机学院的老师的基本信息
+SELECT * FROM teacher 
+WHERE school="计算机学院";
+
+-- ============================================== 分组排序练习
+-- GROUP BY 字句和 HAVING 字句(先分组 咱筛选满足条件的数据.)
+-- 执行设置 sqlmode=onlyfull_groupby  兼容性 否则报1055
+SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+-- 按照专业显示所有的学生信息
+SELECT * FROM student
+GROUP BY specialityno;
+
+
+-- 统计每个专业的人数
+SELECT specialityno AS "专业带吗",COUNT(*) AS '人数' 
+FROM student 
+GROUP BY specialityno;
+
+
+-- 统计学生表中男生和女生的人数
+SELECT ssex AS 性别, COUNT(*) AS 人数
+FROM student
+GROUP BY ssex;
+
+
+-- 计算显示每位同学的最高分最低分平均分
+SELECT studentno AS	学号, MAX(grade) AS 最高分, MIN(grade) AS 最低分, AVG(grade) AS 平均分
+FROM score
+GROUP BY studentno
+
+
+-- 统计每种职称的人数
+SELECT title AS 职称, COUNT(*) AS 人数
+FROM teacher
+GROUP BY title;
+
+
+-- 分学院统计每个学院的教师人数
+SELECT school AS 学院, COUNT(*) AS 人数
+FROM teacher
+GROUP BY school;
+
+
+-- 按照总学分对学生表排序
+SELECT * FROM student
+ORDER BY tc DESC;
+
+
+-- 按照出生日期的降序对所哟有的教授进行排序。
+SELECT * FROM teacher
+WHERE title='教授'
+ORDER BY tbirthday DESC
+
+-- ========================================	多表查询 内连接查询
+-- ===================(首先分析出涉及到几张表,在进行联合操作,两张表必须有相同的字段)
+-- 查出所有通信工程的男生的基本信息。
+SELECT student.*,speciality.*
+FROM student,speciality
+WHERE student.specialityno=speciality.specialityno		-- 等值连接
+AND ssex = '男'
+AND	specialityname='通信工程';
+
+
+-- 查出所有通信工程总学分超过50的同学的基本信息。 内连接(INNER JOIN 或 WHERE)
+SELECT student.*,speciality.*
+FROM student,speciality
+WHERE student.specialityno=speciality.specialityno		-- 等值连接
+AND specialityname = '通信工程'
+AND tc>50;
+
+
+-- 查出所有1999年出生的男生的基本信息。 自然连接
+SELECT * FROM student
+WHERE sbirthday LIKE '1999%'
+AND ssex = '男';
+
+
+-- 查出数据库系统这门课程的最高分平均分。
+SELECT MAX(grade),AVG(grade)
+FROM score,course
+WHERE score.courseno=course.courseno
+AND course.cname = '数据库系统';
+
+
+-- 查出通信工程专业英语课程的最高分和最低分。
+SELECT MAX(grade),MIN(grade)
+FROM course,score,speciality,student
+WHERE course.courseno=score.courseno
+AND speciality.specialityno=student.specialityno
+AND specialityname='通信工程'
+AND cname = '英语';
+
+
+-- 查出选修了通信原理课程的学生的学号，专业和成绩。
+SELECT student.studentno AS '学号', speciality.specialityname AS '课程',score.grade AS '成绩'
+FROM student,speciality,score,course
+WHERE student.specialityno=speciality.specialityno
+AND score.studentno=student.studentno
+AND course.courseno=score.courseno
+AND cname='通信原理';
+
+
+-- 查出高等数学成绩的前三名,显示学号,成绩,专业
+SELECT student.studentno, score.grade, speciality.specialityname
+FROM student, speciality,score, course
+WHERE student.specialityno=speciality.specialityno
+AND score.studentno=student.studentno
+AND course.courseno=score.courseno
+ORDER BY score.grade DESC
+LIMIT 3;
+
+
+-- 查出上了黄玉杰老师的课程的所有同学的学号,课程名.
+SELECT student.studentno AS '学号', course.cname as '课程名'
+FROM student,teacher,lecture,score,course
+WHERE student.studentno=score.studentno
+AND teacher.teacherno=lecture.teacherno
+AND lecture.courseno=course.courseno
+and score.courseno = course.courseno
+AND tname='黄玉杰';
+
+
+
+-- 查出所有职称为教授的老师上的课程的课程名及选课学生的学号,姓名,专业,成绩.
+SELECT student.studentno 学号, student.sname 姓名, speciality.specialityname 专业, score.grade 成绩
+FROM student,speciality,score,teacher,course,lecture
+WHERE student.specialityno = speciality.specialityno
+AND score.courseno=course.courseno
+AND score.studentno=student.studentno
+AND course.courseno = score.courseno
+AND lecture.courseno=course.courseno
+AND lecture.teacherno=teacher.teacherno
+and title='教授';
+
+-- 查出所有网络工程女生的基本信息.
+SELECT *
+FROM speciality,student
+WHERE speciality.specialityno=student.specialityno
+AND student.ssex='女'
+AND speciality.specialityname='网络工程';
+
+
+
+-- ===================课本习题 （外连接） 左右外连接
+-- 查询至少有3名学生选修且以8开头的课程号和平均分
+SELECT course.courseno '课程号', AVG(score.grade) '平均分'
+FROM score,course
+WHERE course.courseno = score.courseno
+GROUP BY score.courseno  -- 按课程号分组 之后 在统计数量
+HAVING COUNT(score.studentno) >= 3 AND course.courseno LIKE '8%';
+
+
+-- 将专业代码为080703的学生按出生日日期进行升序排序。
+SELECT sbirthday
+FROM student 
+WHERE specialityno IN (
+	SELECT specialityno
+	FROM speciality
+	WHERE specialityno='080703'
+)
+ORDER BY sbirthday ASC;
+
+
+
+
+-- 查询选修课程3们以上且成绩在90分以上的学生的情况
+SELECT *
+FROM course,score,student
+WHERE course.courseno=score.courseno
+AND score.studentno=student.studentno
+GROUP BY course.courseno
+HAVING COUNT(course.courseno)>3 AND score.grade>90;
+
+
+
+-- 查询选修了“高等数学” 的学生姓名和成绩。
+-- 内连接
+SELECT student.sname 学生姓名, score.grade 成绩
+FROM course,score,student
+WHERE course.courseno=score.courseno
+AND score.studentno=student.studentno
+AND cname='高等数学';
+
+
+-- 左外连接实现
+SELECT student.sname,score.grade
+FROM student LEFT JOIN score ON (student.studentno=score.studentno)
+WHERE score.courseno IN(
+	SELECT course.courseno FROM course
+	WHERE course.cname='高等数学'
+);
+
+
+
+-- 查询选修了“通信原理”且成绩在80分以上的学生的情况
+SELECT student.sname,score.grade
+FROM student LEFT JOIN score ON (student.studentno=score.studentno)
+WHERE score.courseno IN(
+	SELECT course.courseno FROM course
+	WHERE course.cname='通信原理'
+)
+AND score.grade>80;
+
+
+
+
+-- 差选选修课程的平均分高于90分的教师姓名。
+SELECT teacher.tname as 教师姓名
+FROM course,score,teacher,lecture
+WHERE course.courseno=score.courseno
+AND teacher.teacherno=lecture.teacherno
+AND lecture.courseno=course.courseno
+GROUP BY course.courseno
+HAVING AVG(grade)>90;
+
+
+
+
+-- 查询选修了1201号课程或选修1004号课程和学生姓名、性别和总学分。  DISTINCT -- 去重 清除结果集中重复的行
+SELECT DISTINCT course.courseno AS 课程号, student.sname AS 学生姓名, student.ssex AS 性别, student.tc AS 总学分
+FROM course, score, student
+WHERE course.courseno = score.courseno
+AND student.studentno = score.studentno
+AND (course.courseno = '1201' OR course.courseno = '1004');
+
+
+
+
+-- 查询通信工程专业学生的最高分和平均分
+SELECT MAX(grade) as 最高分, AVG(grade) as 平均分
+FROM student LEFT JOIN score ON (student.studentno=score.studentno)
+WHERE student.specialityno IN(
+	SELECT speciality.specialityno FROM speciality
+	WHERE speciality.specialityname='通信工程'
+);
+
+
+
+
+-- 查询每个专业的最高分以及其对应的课程名
+SELECT speciality.specialityname AS 专业名, MAX(score.grade) AS 最高分, course.cname AS 课程名
+FROM speciality
+JOIN student ON speciality.specialityno = student.specialityno
+JOIN score ON student.studentno = score.studentno
+JOIN course ON score.courseno = course.courseno
+GROUP BY speciality.specialityname;
+
+
+
+-- 查询数据库系统课程的任课教师
+SELECT teacher.tname as 任课教师
+FROM teacher,lecture,course
+WHERE teacher.teacherno=lecture.teacherno
+AND lecture.courseno=course.courseno
+AND cname='数据库系统';
+
+
+-- 查询成绩表中高于平均分的成绩记录。
+SELECT *
+FROM score
+WHERE grade > (
+	-- 子查询 嵌套
+	SELECT AVG(grade)
+	FROM score
+);
+
+
+-- ====================      所有题目利用子查询 和 联合查询实现 计算  		====================================
+
+
+-- ==============================			视图与索引		=====================================
+
+-- 创建视图
+-- 在数据库teaching中创建V_TeacherLecture视图，该视图包含
+-- teacher表的所有教师的	教师编号 姓名 职称 学院 和 lecture中的上课地点
+
+-- 题目 分析 ，，，将两张表的关联起来 并且 输出指定字段。
+create or replace view V_TeacherLecture
+as
+select teacher.teacherno, teacher.tname, teacher.title, teacher.school,lecture.location
+from teacher,lecture
+where teacher.teacherno=lecture.teacherno
+with check option;
+
+-- 创建V_teacherCourseLecture视图，视图模型包含
+-- teacher表中的
+-- 教师编号、姓名、职称、学院、course表的 课程号 课程名 lecture表的上课地点
+-- 且学院为计算机学院，查询结果按照教师编号升序排序。
+
+-- 题目分析 涉及三张表关联。
+create or replace view V_teacherCourseLecture
+as
+select teacher.teacherno, teacher.tname, teacher.title, teacher.school,lecture.location
+from teacher,lecture,course
+where teacher.teacherno=lecture.teacherno
+and lecture.courseno=course.courseno
+and teacher.school = '计算机学院'
+order by teacher.teacherno;
+
+-- 视图模型查询
+select * 
+from V_TeacherLecture;
+
+select *
+from V_teacherCourseLecture
+
+-- 指定字段
+select teacherno,tname,school
+from V_teacherCourseLecture
+
+
+
+
+-- =========== 		创建更新视图(包含修改 拆入 删除)			==========================
+-- 对于视图的操作最终会转换为持久化存储.
+-- 视图包含 聚合函数 以及 其他关键字结构 任意一种那么他就是不可更新的.  
+-- 其实说白了  只要不包含 order by 等关键字 他就是一个可更新的 视图。。。
+-- 创建语句 和 普通的 语句一致。
+
+-- 创建可更新视图V_TeacherRenewable,包含信息teacher表所有计算机学院的所有教师的信息.
+create or replace view V_TeacherRenewable
+as
+select * 
+from teacher
+where teacher.school = '计算机学院'
+
+select * from V_TeacherRenewable;
+
+-- 向可更新视图插入数据。（插入语句 编写规范 与普通的一致）
+insert into V_TeacherRenewable
+values ('100012','刘勇','男','1981-06-15','副教授','计算机学院');
+
+-- 最终查看 teacher 表 。数据 是否被  持久化存储了。
+select * from teacher;  -- 可以看到i 对试图的操作 持久化到  teacher 表。
+
+
+-- 修改数据 update 语句。  使用 update  一定要给定条件  否则 默认修改全部信息 。。删除语句 也是如此。
+update V_TeacherRenewable 
+set tbirthday='1981-02-15'
+
+
+-- 删除数据
+delete from V_TeacherRenewable
+where teacherno = '100012';
+
+
+-- 删除视图drop
+drop view [视图名]
+
+-- ===================================== 		mysql 编程技术		=========================================
+-- 创建存储过程：安全性、模块化设计、减少网络流量、提高性能。（开发过程中 也能 使用 模块化sql语句。）
+
+
+
+
+
+
+
+
+
+
+
+-- ===================================			MYSQL安全管理  ===============================
+-- 数据库 用户权限的设置。
+
+
+
+
+
+
+-- ======================				mysql 事务管理   =============================
+-- 数据唯一性 和 完整性 出现的。如果一条sql出错 那么 之前执行的sql语句 会 回滚到 没有执行之前。恢复原状。
+
+
+
+
+
+-- ===============================  php mysql 教学管理系统开发  =================================
+-- 整个系统开发过程中所需的sql语句编写
+
+
+
+
+-- 添加模块
+
+
+
+
+
+
+-- 修改更新模块
+
+
+
+
+
+
+-- 查询模块
+
+
+
+
+
+
+
+-- 删除模块
+
+
+
+
+-- 实施流程
+-- 具备html基础
+-- php嵌入式查询。
+
+
+
+
+
+
+
+
+
+
+
