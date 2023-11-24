@@ -3,15 +3,15 @@
 
  Source Server         : 本机开发数据库
  Source Server Type    : MySQL
- Source Server Version : 50726
+ Source Server Version : 80012
  Source Host           : localhost:3306
  Source Schema         : teaching
 
  Target Server Type    : MySQL
- Target Server Version : 50726
+ Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 24/11/2023 07:44:30
+ Date: 24/11/2023 13:40:07
 */
 
 SET NAMES utf8mb4;
@@ -26,7 +26,7 @@ CREATE TABLE `course`  (
   `cname` char(16) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '课程名',
   `credit` tinyint(4) NULL DEFAULT NULL COMMENT '学分',
   PRIMARY KEY (`courseno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of course
@@ -46,7 +46,7 @@ CREATE TABLE `lecture`  (
   `courseno` char(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '课程号',
   `location` char(10) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '上课地点',
   PRIMARY KEY (`teacherno`, `courseno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of lecture
@@ -65,7 +65,7 @@ CREATE TABLE `score`  (
   `courseno` char(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '课程号',
   `grade` tinyint(4) NULL DEFAULT NULL COMMENT '成绩',
   PRIMARY KEY (`studentno`, `courseno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of score
@@ -97,7 +97,7 @@ CREATE TABLE `speciality`  (
   `specialityno` char(6) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '专业代码',
   `specialityname` char(16) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '专业名称',
   PRIMARY KEY (`specialityno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of speciality
@@ -121,7 +121,7 @@ CREATE TABLE `student`  (
   `tc` tinyint(4) NULL DEFAULT NULL COMMENT '总学分',
   `specialityno` char(6) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '专业代码',
   PRIMARY KEY (`studentno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of student
@@ -145,7 +145,7 @@ CREATE TABLE `teacher`  (
   `title` char(12) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '职称',
   `school` char(12) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '学院',
   PRIMARY KEY (`teacherno`) USING BTREE
-) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = FIXED;
 
 -- ----------------------------
 -- Records of teacher
@@ -173,5 +173,148 @@ CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `v_teacherlecture` AS sel
 -- ----------------------------
 DROP VIEW IF EXISTS `v_teacherrenewable`;
 CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `v_teacherrenewable` AS select `teacher`.`teacherno` AS `teacherno`,`teacher`.`tname` AS `tname`,`teacher`.`tsex` AS `tsex`,`teacher`.`tbirthday` AS `tbirthday`,`teacher`.`title` AS `title`,`teacher`.`school` AS `school` from `teacher` where (`teacher`.`school` = '计算机学院');
+
+-- ----------------------------
+-- Procedure structure for P_Bl
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Bl`;
+delimiter ;;
+CREATE PROCEDURE `P_Bl`()
+BEGIN
+-- 声明变量
+	DECLARE v_n int(3);
+	DECLARE v_str char(5);
+-- 赋值
+	SET v_n = 888;
+	SET v_str = 'Cai';
+-- 输出
+	SELECT v_n, v_str;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Bl_Name_Sex
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Bl_Name_Sex`;
+delimiter ;;
+CREATE PROCEDURE `P_Bl_Name_Sex`()
+BEGIN
+	DECLARE v_name char(8);
+	DECLARE v_sex char(2);
+	SELECT tname, tsex
+	INTO v_name,v_sex		/*一次存入两个局部变量*/
+	FROM teacher
+	WHERE teacherno = '100004';
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_cat00011cat
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_cat00011cat`;
+delimiter ;;
+CREATE PROCEDURE `P_cat00011cat`()
+BEGIN
+	SELECT 'cat00011cat';
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Math
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Math`;
+delimiter ;;
+CREATE PROCEDURE `P_Math`(OUT v_gde char(20))
+BEGIN
+	-- 设置局部变量
+	DECLARE v_avg DECIMAL(4,2); -- 设置定点数类型 四位数 保留 两位小数 90.05;
+	SELECT AVG(grade)
+	INTO v_avg
+	FROM student, course, score
+	WHERE student.studentno = score.studentno
+	AND course.courseno=score.courseno
+	AND course.cname = '高等数学';
+	-- 判断 IF-THEN-ELSE
+	IF v_avg > 80 THEN
+		SET v_gde = '高等数学成绩良好';
+	ELSE
+		SET v_gde = '高等数学成绩一般';
+	END IF;		-- 判断结束
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Nmae
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Nmae`;
+delimiter ;;
+CREATE PROCEDURE `P_Nmae`(IN v_teacherno char(6))
+BEGIN
+	SELECT tname
+	FROM teacher
+	WHERE teacherno = v_teacherno;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Sname_Score
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Sname_Score`;
+delimiter ;;
+CREATE PROCEDURE `P_Sname_Score`(IN v_sname CHAR(6), OUT v_specialityname CHAR(16))
+BEGIN
+	SELECT speciality.specialityname
+	INTO v_specialityname
+	FROM student, speciality
+	WHERE student.specialityno = speciality.specialityno
+	AND student.sname = v_sname;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Speciality_Name
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Speciality_Name`;
+delimiter ;;
+CREATE PROCEDURE `P_Speciality_Name`(IN v_specialityname CHAR(16))
+BEGIN
+	SELECT student.*,speciality.*
+	FROM student,speciality
+	WHERE student.specialityno = speciality.specialityno
+	AND specialityname = v_specialityname;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for P_Title
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `P_Title`;
+delimiter ;;
+CREATE PROCEDURE `P_Title`(IN v_teacherno CHAR(6), OUT v_type CHAR(10))
+BEGIN
+	DECLARE v_str char(12);
+	SELECT title
+	INTO v_str
+	FROM teacher
+	WHERE teacher.teacherno = v_teacherno;
+	-- 以上语句数据准备完毕,开始进程case流程控制
+	CASE v_str
+		WHEN '教授' THEN SET v_type = '高级职称';
+		WHEN '副教授' THEN SET v_type = '高级职称';
+		WHEN '讲师' THEN SET v_type = '中级职称';
+		WHEN '助教' THEN SET v_type = '初级职称';
+		-- 如果一个都不是 那么直接输出 无职称.
+		ELSE SET v_type := '无职称';
+	END CASE;	-- 流程控制结束标志
+END
+;;
+delimiter ;
 
 SET FOREIGN_KEY_CHECKS = 1;

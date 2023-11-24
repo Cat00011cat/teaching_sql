@@ -1,4 +1,4 @@
--- Cat00011cat
+﻿-- Cat00011cat
 -- thecat.top
 
 --  ===================		er实体关系  ===========================
@@ -541,15 +541,179 @@ drop view [视图名]
 
 -- ===================================== 		mysql 编程技术		=========================================
 -- 创建存储过程：安全性、模块化设计、减少网络流量、提高性能。（开发过程中 也能 使用 模块化sql语句。）
+-- 不带参数存储过程 输出 cat00011cat
+-- 改结束符号   mysql5.x版本不支持修改结束符号，，，建议升级mysql至8.0
+DELIMITER $$
+CREATE PROCEDURE P_cat00011cat()
+BEGIN
+	SELECT 'cat00011cat';
+END $$
+-- 将结束符号更改回去
+DELIMITER ;
+-- 调用函数
+CALL P_cat00011cat(); 
+
+
+-- 带参数存储过程创建
+DELIMITER $$
+CREATE PROCEDURE P_Nmae(IN v_teacherno char(6))
+BEGIN
+	SELECT tname
+	FROM teacher
+	WHERE teacherno = v_teacherno;
+END $$
+-- 将结束符号更改回去
+DELIMITER ;
+-- 调用函数
+CALL P_Nmae('800023'); 
+
+
+-- 局部变量
+DELIMITER $$
+CREATE PROCEDURE P_Bl()
+BEGIN
+-- 声明变量
+	DECLARE v_n int(3);
+	DECLARE v_str char(5);
+-- 赋值
+	SET v_n = 888;
+	SET v_str = 'Cai';
+-- 输出
+	SELECT v_n, v_str;
+END $$
+-- 修改回去结束符号
+DELIMITER ;
+-- 调用
+CALL P_Bl();
+
+
+--  into子句 将查出来的列值直接存储到 局部变量当中
+-- 将教师编号为xxx的姓名年龄信息查询出来直接存入局部变量中.
+DELIMITER $$
+CREATE PROCEDURE P_Bl_Name_Sex()
+BEGIN
+	DECLARE v_name char(8);
+	DECLARE v_sex char(2);
+	SELECT tname, tsex
+	INTO v_name,v_sex		/*一次存入两个局部变量*/
+	FROM teacher
+	WHERE teacherno = '100021';
+END $$
+
+DELIMITER ;
+
+CALL P_Bl_Name_Sex();
+
+-- 流程控制
+-- 如果高等数学平均成绩大于80分那么良好 否则 一般
+DELIMITER $$
+CREATE PROCEDURE P_Math(OUT v_gde char(20))
+BEGIN
+	-- 设置局部变量
+	DECLARE v_avg DECIMAL(4,2); -- 设置定点数类型 四位数 保留 两位小数 90.05;
+	SELECT AVG(grade)
+	INTO v_avg
+	FROM student, course, score
+	WHERE student.studentno = score.studentno
+	AND course.courseno=score.courseno
+	AND course.cname = '高等数学';
+	-- 判断 IF-THEN-ELSE
+	IF v_avg > 80 THEN
+		SET v_gde = '高等数学成绩良好';
+	ELSE
+		SET v_gde = '高等数学成绩一般';
+	END IF;		-- 判断结束
+END $$
+
+DELIMITER ;
+
+-- 调用
+CALL P_Math(@v_gde);
+-- 查看执行结果
+SELECT @arrivalgoods;
+-- 查询v_gde数据
+select @v_gde; 
+
+
+-- 使用case 进行流程控制.
+DELIMITER $$
+CREATE PROCEDURE P_Title(IN v_teacherno CHAR(6), OUT v_type CHAR(10))
+BEGIN
+	DECLARE v_str char(12);
+	SELECT title
+	INTO v_str
+	FROM teacher
+	WHERE teacher.teacherno = v_teacherno;
+	-- 以上语句数据准备完毕,开始进程case流程控制
+	CASE v_str
+		WHEN '教授' THEN SET v_type = '高级职称';
+		WHEN '副教授' THEN SET v_type = '高级职称';
+		WHEN '讲师' THEN SET v_type = '中级职称';
+		WHEN '助教' THEN SET v_type = '初级职称';
+		-- 如果一个都不是 那么直接输出 无职称.
+		ELSE SET v_type := '无职称';
+	END CASE;	-- 流程控制结束标志
+END $$
+
+DELIMITER ;
+
+CALL P_Title('800023',@v_type);
+-- 看看结果
+SELECT @v_type;
+
+-- ==================  课上练习 = ===============
+-- 根据输入的专业名称查出该专业的所有同学的情况.
+DELIMITER $$
+CREATE PROCEDURE P_Speciality_Name(IN v_specialityname CHAR(16))
+BEGIN
+	SELECT student.*,speciality.*
+	FROM student,speciality
+	WHERE student.specialityno = speciality.specialityno
+	AND specialityname = v_specialityname;
+END $$
+
+DELIMITER ;
+
+CALL P_Speciality_Name('通信工程');
 
 
 
+-- 输入学生姓名查出这位同学的所有成绩信息
+DELIMITER $$
+CREATE PROCEDURE P_Sname_Score(IN v_sname CHAR(6))
+BEGIN
+	SELECT student.*,score.*
+	FROM student,score
+	WHERE student.studentno = score.studentno
+	AND student.sname = v_sname;
+END $$
+
+DELIMITER ;
+
+CALL P_Sname_Score('张小翠');
 
 
+-- 根据输入的学生姓名给出他所属的专业名称
+DELIMITER $$
+CREATE PROCEDURE P_Sname_Score(IN v_sname CHAR(6), OUT v_specialityname CHAR(16))
+BEGIN
+	SELECT speciality.specialityname
+	INTO v_specialityname
+	FROM student, speciality
+	WHERE student.specialityno = speciality.specialityno
+	AND student.sname = v_sname;
+END $$
+DELIMITER ;
+
+CALL P_Sname_Score('张小翠',@v_specialityname);
+SELECT @v_specialityname;
+
+-- 应用题
+	
 
 
-
-
+-- 循环语句
+	
 
 
 -- ===================================			MYSQL安全管理  ===============================
